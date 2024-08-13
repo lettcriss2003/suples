@@ -1,0 +1,60 @@
+version: "3.8" 
+services:
+
+  #Estos nombres pueden ser cualquiera 
+  bd:
+   # cosas indispensables las variables de entorno, network, puertos, imagen y los volumenes
+   # puedo partir de un build -> construccion de la imagen a partir del dockerfile 
+    #build: 
+    #- "." # en el caso de que el dockerfile este en mi carpeta raiz donde tengo el dockercompose.yml 
+    #  - "./front_suples" # en el caso de que el dockerfile este dentro de otra carpeta 
+   # puedo especificar la ruta de un dockerfile que yo quiero que se construya 
+   # puedo partir desde una imagen que ya esta en dockerhub o que ya tengo en la compu 
+    image: mysql:latest
+    # image: sqlite:latest
+    container_name: bd
+    ports: 
+      - "4000:3306" # puertos que especifique en el dockerfile con los que construi el contenedor
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456789
+      MYSQL_DATABASE: practica9
+    # depende de cada base de datos, esas guardan en una carpeta diferente 
+    volumes:
+      - volumen:/var/lib/mysql
+    networks:
+      - my_network
+    
+  backend:
+    image: app:latest
+    container_name: backend
+    ports:
+      - "4001:8000"
+    networks:
+      - my_network
+    depends_on:
+      - bd
+  frontend:
+    image: frontapp:latest
+    container_name: frontend
+    ports:
+      - "8009:5173"
+    networks:
+      - my_network
+    depends_on: # No asegura que se debe levantar primero el back, solo el orden de arranque 
+      - backend
+volumes:
+  volumen:
+    name: volumen
+networks:
+  my_network:
+    name: my_network 
+    driver: bridge # -> es un tipo de red, el de tipo puente(para especificar entre varios contenedores)  
+
+  # es para un respaldo de la base de datos, percistencia de los archivos de los contenedores 
+# Para correrlo 
+#  docker-compose up -d
+# si no funca iniciar uno por uno con docker start nombre 
+
+
+    
+
